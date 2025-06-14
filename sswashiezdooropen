@@ -1,0 +1,169 @@
+local ismain = getgenv().IsMain
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local DoorsScript = getsenv(LocalPlayer.PlayerScripts.Doors)
+local DoorLocation = {0,0,0}
+
+local doors = {}
+for _, door in game:GetService("Workspace"):GetDescendants() do
+    if door.Name == "CarWashTicketDoor" or door.Name == "LaneDoor" or door.Name == "StaffRoomDoor" or
+       door.Name == "CafeDoor" or door.Name == "StaffEntranceDoor1" or door.Name == "StaffEntranceDoor2" or
+       door.Name == "StaffHallwayEntrance" or door.Name == "HangoutDoor" or door.Name == "ExteriorDoor" or
+       door.Name == "ConferenceRoomDoor" or door.Name == "WarehouseDoor" or door.Name == "LaneGateDoor" then
+        if ismain then
+                if door:GetAttribute("PermLevel") ~= nil then
+                    local FakeDoor = door:Clone()
+                    FakeDoor.Parent = door.Parent
+                    FakeDoor.Name = "FakeDoor"
+                    if FakeDoor:GetAttribute("PermLevel") < 100 then
+                        FakeDoor:SetAttribute("PermLevel", 0)
+                    end
+                    if door.PrimaryPart then
+                        door.PrimaryPart.CFrame = door.PrimaryPart.CFrame*CFrame.new(0,1000000,0)
+                    else
+                        door:WaitForChild("HINGE").CFrame = door.HINGE.CFrame*CFrame.new(0,1000000,0)
+                    end
+                    local RealTouchPart
+                    local stop = false
+                    for _,touchpart in door:GetChildren() do
+                        if not stop then
+                            if touchpart:FindFirstChild("TouchInterest") then
+                                stop = true
+                                RealTouchPart = touchpart
+                            end
+                        end
+                    end
+                    for _,touchpart in FakeDoor:GetChildren() do
+                        if touchpart:FindFirstChild("TouchInterest") then
+                            touchpart.Touched:Connect(function(part)
+                                pcall(function()
+                                    if part:IsDescendantOf(LocalPlayer.Character) and door:GetAttribute("PermLevel") == 0 then
+                                        firetouchinterest(RealTouchPart, LocalPlayer.Character.PrimaryPart, 1)
+                                        firetouchinterest(RealTouchPart, LocalPlayer.Character.PrimaryPart, 0)
+                                    elseif part:IsDescendantOf(LocalPlayer.Character) then
+                                        DoorLocation = {touchpart.Position.X,touchpart.Position.Y,touchpart.Position.Z}
+                                        repeat task.wait() until door:GetAttribute("Debounce") == true
+                                        DoorLocation = {0,0,0}
+                                    end
+                                end)
+                            end)
+                        end
+                    end
+                    for _,touchpart in door:GetChildren() do
+                        if touchpart:FindFirstChild("TouchInterest") then
+                            touchpart.Touched:Connect(function(part)
+                                pcall(function()
+                                    if part.Parent:FindFirstChild("Humanoid") and part.Parent ~= LocalPlayer.Character and door:GetAttribute("Debounce") == false and FakeDoor:GetAttribute("Debounce") == false then
+                                        for _,player in Players:GetPlayers() do
+                                            if player.Character then
+                                                if part:IsDescendantOf(player.Character) then
+                                                    if player.GroupInfo.Rank.Value >= door:GetAttribute("PermLevel") then
+                                                        FakeDoor:SetAttribute("Debounce", true)
+                                                        DoorsScript.openDoor(player, FakeDoor, true)
+                                                    else
+                                                        FakeDoor:SetAttribute("Debounce", true)
+                                                        DoorsScript.openDoor(player, FakeDoor, false)
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end)
+                            end)
+                        end
+                    end
+                end
+        else
+            table.insert(doors,door)
+        end
+    end
+end
+if ismain then
+    RunService.Heartbeat:Connect(function()
+        pcall(function()  
+            local dataTable = {}
+            local newCFrame = LocalPlayer.Character.PrimaryPart.CFrame * CFrame.new(0, 0, 0)
+            local x, y, z, R00, R01, R02, R10, R11, R12, R20, R21, R22 = newCFrame:GetComponents()
+            dataTable = {DoorLocation, x, y, z, R00, R01, R02, R10, R11, R12, R20, R21, R22}
+            writefile("Doorhacks.lua", HttpService:JSONEncode(dataTable))
+        end)
+    end)
+else
+    local AlignPart = Instance.new("Part")
+    AlignPart.Parent = game:GetService("Workspace")
+    AlignPart.Name = "DoorHacksPart"
+    AlignPart.Anchored = true
+    AlignPart.CanCollide = false
+
+    local Orienter = Instance.new("AlignOrientation")
+    Orienter.Parent = AlignPart
+    local Positioner = Instance.new("AlignPosition")
+    Positioner.Parent = AlignPart
+    local Attachment = Instance.new("Attachment")
+    Attachment.Parent = AlignPart
+
+    Positioner.RigidityEnabled = true
+    Positioner.Responsiveness = 200
+    Orienter.Responsiveness = 200
+    Orienter.RigidityEnabled = true
+    Positioner.Attachment1 = Attachment
+    Orienter.Attachment1 = Attachment
+    
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local Attachment2 = Instance.new("Attachment")
+    Attachment2.Parent = Character.PrimaryPart
+    Positioner.Attachment0 = Attachment2
+    Orienter.Attachment0 = Attachment2
+
+    LocalPlayer.CharacterRemoving:Connect(function()
+        Attachment2:Destroy()
+    end)
+    
+    LocalPlayer.CharacterAdded:Connect(function()
+        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local NewAttachment = Instance.new("Attachment")
+        NewAttachment.Parent = Character.PrimaryPart
+        Positioner.Attachment0 = NewAttachment
+        Orienter.Attachment0 = NewAttachment
+        Character.AncestryChanged:Connect(function()
+            if Character.Parent == nil then
+                NewAttachment:Destroy()
+            end
+        end)
+    end)
+    
+    RunService.Heartbeat:Connect(function()
+        pcall(function()
+            local data = HttpService:JSONDecode(readfile("Doorhacks.lua"))
+            for _, v in next, LocalPlayer.Character.Humanoid:GetPlayingAnimationTracks() do
+                v:Stop()
+            end
+            LocalPlayer.Character.Animate.Enabled = false
+            
+            for _, part in LocalPlayer.Character:GetDescendants() do
+                pcall(function()
+                    part.CanCollide = false
+                end)
+            end
+            
+            LocalPlayer.Character:PivotTo(CFrame.new(data[2], -6, data[4], unpack(data, 5, 13)))
+            AlignPart.CFrame = CFrame.new(data[2], -6, data[4], unpack(data, 5, 13))
+            
+            for _, door in doors do
+                if (door:FindFirstChildOfClass("Part").Position - Vector3.new(data[2], data[3], data[4])).Magnitude <= 5 then
+                    for _, b in door:GetChildren() do
+                        pcall(function()
+                            if b.Position == Vector3.new(unpack(data[1])) then
+                                firetouchinterest(b, LocalPlayer.Character.PrimaryPart, 1)
+                                firetouchinterest(b, LocalPlayer.Character.PrimaryPart, 0)
+                            end
+                        end)
+                    end
+                end
+            end
+        end)
+    end)
+end
