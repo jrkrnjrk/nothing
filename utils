@@ -23,6 +23,18 @@ Username = getgenv().Username
 local runScript = true
 local copychat = false
 local copychatUsername = ""
+
+if getgenv().cbzloaded == true then
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "already running",
+        Text = "leocontrolbot is already running",
+        Time = 6
+    })
+
+    return
+end
+
+getgenv().cbzloaded = true
 if LocalPLR.Name ~= Username then
 
     local logChat = getgenv().logChat
@@ -38,7 +50,7 @@ if LocalPLR.Name ~= Username then
     local index
     function getIndex()
 
-        for i, bot in ipairs(bots) do
+        for i, bot in pairs(bots) do
             if LocalPLR.DisplayName == bot then
                 index = i
                 break
@@ -59,18 +71,18 @@ if LocalPLR.Name ~= Username then
 
     end
 
-    chat(" ")
+    chat("")
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Thank You",
-        Text = "Thank you for using leobotcontrol!",
+        Title = "thank You",
+        Text = "thank you for using leocontrolbot!",
         Time = 6
     })
 
     local latestVersion = request({ Url = "https://raw.githubusercontent.com/jrkrnjrk/nothing/refs/heads/main/vession", Method = "GET" }).Body:match("^%s*(.-)%s*$")
-    if latestVersion ~= "1.1.3" then
+    if latestVersion ~= "1.1.4" then
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Old Version!",
-            Text = "Looks like you are using old version. Get the newest one from the discord server!",
+            Title = "old version",
+            Text = "looks like you are using old version. please pm me to get the new loadstring",
             Time = 8
         })
     end
@@ -84,17 +96,15 @@ if LocalPLR.Name ~= Username then
                 end
             end
 
-            screenGui = Instance.new("ScreenGui")
+            screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
             screenGui.Name = "bruhIDK"
             screenGui.IgnoreGuiInset = true
-            screenGui.Parent = game:GetService("CoreGui")
 
-            local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BackgroundColor3 = Color3.fromRGB(0, 205, 216)
-            frame.Parent = screenGui
+            local mainFrame = Instance.new("Frame", screenGui)
+            mainFrame.Size = UDim2.new(1, 0, 1, 0)
+            mainFrame.BackgroundColor3 = Color3.fromRGB(0, 205, 216)
 
-            local textLabel = Instance.new("TextLabel")
+            local textLabel = Instance.new("TextLabel", mainFrame)
             textLabel.Size = UDim2.new(1, 0, 1, 0)
             textLabel.Text = text
             textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -104,7 +114,6 @@ if LocalPLR.Name ~= Username then
             textLabel.TextScaled = true
             textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
             textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-            textLabel.Parent = frame
         elseif enabled == false then
             if screenGui then
                 screenGui:Destroy()
@@ -266,14 +275,14 @@ if LocalPLR.Name ~= Username then
 
             local targetPLR = message:sub(13)
 
-            if game.Players[targetPLR] then
+            if game.Players:FindFirstChild(targetPLR) then
                 table.insert(whitelist, targetPLR)
 
                 if index == 1 then
-                    chat("Added Player To Whitelist!")
+                    chat("succes")
                 end
             elseif index == 1 then
-                chat("Player Could Not Be Found!")
+                chat("not found")
             end
         end
 
@@ -290,13 +299,14 @@ if LocalPLR.Name ~= Username then
                     table.remove(whitelist, i)
 
                     if index == 1 then
-                        chat("Removed Player From Whitelist!")
+                        chat("succes")
                     end
 
                 end
             end
         end
 
+        -- ADMIN:
         if msg:sub(1, 7) == Prefix .. "admin+" then
 
             if player.Name ~= Username then
@@ -305,14 +315,14 @@ if LocalPLR.Name ~= Username then
 
             local targetPLR = message:sub(9)
 
-            if game.Players[targetPLR] then
+            if game.Players:FindFirstChild(targetPLR) then
                 table.insert(admins, targetPLR)
 
                 if index == 1 then
-                    chat("Added Player To Admins!")
+                    chat("succes")
                 end
             elseif index == 1 then
-                chat("Player Could Not Be Found!")
+                chat("not found")
             end
         end
 
@@ -329,7 +339,7 @@ if LocalPLR.Name ~= Username then
                     table.remove(admins, i)
 
                     if index == 1 then
-                        chat("Removed Player From Admins!")
+                        chat("succes")
                     end
 
                 end
@@ -346,7 +356,7 @@ if LocalPLR.Name ~= Username then
             local targetIndex = tonumber(msg:sub(12))
             if not targetIndex then
                 if index == 1 then
-                    chat("Please enter bot index to remove!")
+                    chat("number?")
                 end
 
                 return
@@ -363,21 +373,21 @@ if LocalPLR.Name ~= Username then
 
             getIndex()
             if index == 1 then
-                chat("Bot " .. targetIndex .. " has been removed!")
+                chat("b " .. targetIndex .. " removed")
             end
         end
 
         -- PRINTCMDS:
         if msg:sub(1, 10) == Prefix .. "printcmds" then
 
-            print("\n---------- LEO CONTROL BOT CMDS ----------\n" .. request({ Url = "https://raw.githubusercontent.com/jrkrnjrk/nothing/refs/heads/main/basiccmds.txt", Method = "GET" }).Body)
+            print("\n---------- LEOCONTROLBOT CMDS ----------\n" .. request({ Url = "https://raw.githubusercontent.com/jrkrnjrk/nothing/refs/heads/main/basiccmds.txt", Method = "GET" }).Body)
             if index == 1 then
-                chat("Printed commands to the console!")
+                chat("printed")
             end
         end
 
         -- REJOIN:
-        if msg:sub(1, 7) == Prefix .. 'rejoin' then
+        if msg:sub(1, 7) == Prefix .. "rejoin" then
 
             if player.Name ~= Username and not isAdmin(player.Name) then
                 return
@@ -386,7 +396,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 LocalPLR:Kick("REJOINING...")
                 wait()
-                game:GetService('TeleportService'):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPLR)
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPLR)
             end
 
             specifyBots(msg:sub(9), runCode)
@@ -439,13 +449,13 @@ if LocalPLR.Name ~= Username then
                 logChat = false
 
                 if index == 1 then
-                    chat("Logchat has been disabled!")
+                    chat("succes d")
                 end
             elseif switch == "enable" then
                 logChat = true
 
                 if index == 1 then
-                    chat("Logchat has been enabled!")
+                    chat("succes e")
                 end
             end
         end
@@ -457,12 +467,12 @@ if LocalPLR.Name ~= Username then
             local targetPLR = getFullPlayerName(args[1])
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
                     copychat = true
                     copychatUsername = targetPLR
 
                     if index == 1 then
-                        chat("Copying " .. targetPLR .. "'s chat!")
+                        chat("Cop " .. targetPLR .. "'s c")
                     end
                 end
             end
@@ -478,7 +488,7 @@ if LocalPLR.Name ~= Username then
                 copychatUsername = ""
 
                 if index == 1 then
-                    chat("Stopped copying chat!")
+                    chat("stopped")
                 end
             end
 
@@ -610,7 +620,7 @@ if LocalPLR.Name ~= Username then
         if msg:sub(1, 3) == Prefix .. "4k" then
             local targetPLR = getFullPlayerName(message:sub(5))
 
-            if game.Players[targetPLR] then
+            if game.Players:FindFirstChild(targetPLR) then
 
                 local args = getArgs(message:sub(5))
                 local targetPLR = getFullPlayerName(args[1])
@@ -686,29 +696,6 @@ if LocalPLR.Name ~= Username then
 
         end
 
-        -- SCM:
-        if msg:sub(1, 4) == Prefix .. "scm" then
-
-            if player.Name ~= Username and not isAdmin(player.Name) then
-                return
-            end
-
-            local scamLines = {
-                "🤑 WANT FREE BOBUX? GO TO SCAM.COM TO GET FREE BOBUX 🤑",
-                "🤑 FREE ROBUX NO CAP! JUST SEND YOUR ROBLOX USERNAME AND PASSWORD TO TRUSTWORTHYBOBUXPROVIDER.GOV 🤑",
-                "🤑 WANT FREE BOBUX? JUST ENTER YOUR PASSWORD AT FREEBOBUX4U.COM 🤑",
-                "🔥 FREE BOBUX? JUST PUT YOUR USERNAME AND PASSWORD AT FREEBOBUX.HACK 🔥",
-                "💸 GET 100,000 ROBUX FAST! GO TO LEGITROBUXGENERATOR.NET 💸",
-                "😎 WANT UNLIMITED BOBUX? CLICK THE LINK AND ENTER YOUR DETAILS! REALROBUXGEN.BIZ 😎"
-            }
-
-            function runCode()
-                chat(loadstring(game:HttpGet("https://raw.githubusercontent.com/jrkrnjrk/nothing/refs/heads/main/erygood"))().bypassText(scamLines[math.random(1, #scamLines)], 1))
-            end
-
-            specifyBots(msg:sub(6), runCode)
-        end
-
         -- ORBIT:
         if msg:sub(1, 6) == Prefix .. "orbit" then
 
@@ -732,7 +719,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 workspace.Gravity = 0
 
-                orbit1 = game:GetService('RunService').Stepped:connect(function(t, dt)
+                orbit1 = game:GetService("RunService").Stepped:connect(function(t, dt)
                     rot = rot + dt * rotspeed
 
                     local offsetAngle = rot - (index * spacing)
@@ -769,7 +756,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 workspace.Gravity = 0
 
-                orbit2 = game:GetService('RunService').Stepped:connect(function(t, dt)
+                orbit2 = game:GetService("RunService").Stepped:connect(function(t, dt)
                     rot = rot + dt * rotspeed
 
                     local offsetAngle = rot - (index * spacing)
@@ -805,7 +792,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 workspace.Gravity = 0
 
-                lineorbitF = game:GetService('RunService').Stepped:connect(function(t, dt)
+                lineorbitF = game:GetService("RunService").Stepped:Connect(function(t, dt)
                     rot = rot + dt * rotspeed
 
                     local offset = Vector3.new(0, 0, index * spacing) 
@@ -890,7 +877,7 @@ if LocalPLR.Name ~= Username then
             local targetPLR = getFullPlayerName(args[1])
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
                     LocalPLR.Character:FindFirstChild("Humanoid"):MoveTo(game.Players[targetPLR].Character:FindFirstChild("HumanoidRootPart").Position)
                 end
             end
@@ -906,7 +893,7 @@ if LocalPLR.Name ~= Username then
             local targetPLR = getFullPlayerName(args[1])
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
                     LocalPLR.Character.HumanoidRootPart.CFrame = game.Players[targetPLR].Character.HumanoidRootPart.CFrame
                 end
             end
@@ -1028,7 +1015,7 @@ if LocalPLR.Name ~= Username then
             local fallHeight = tonumber(args[2]) or 80
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
                     rainF = RunService.Heartbeat:Connect(function() -- RUNSERVICE W
                         local hum = LocalPLR.Character:FindFirstChild("Humanoid")
                         if hum and hum.Health > 0 then
@@ -1072,6 +1059,60 @@ if LocalPLR.Name ~= Username then
 
             specifyBots(msg:sub(14), runCode)
 
+        end
+
+        -- ROBOT:
+        if msg:sub(1, 6) == Prefix .. "robot" then
+            local targetPLR = getFullPlayerName(message:sub(8))
+
+            if #bots < 4 then
+                if index == 1 then
+                    chat("4 b neeeded")
+                end
+            end
+
+            workspace.Gravity = 0
+            LocalPLR.Character.Humanoid.PlatformStand = true
+
+            if game.Players:FindFirstChild(targetPLR) then
+                if index == 1 then
+                    robotF = RunService.Heartbeat:Connect(function()
+                        LocalPLR.Character.HumanoidRootPart.CFrame =
+                            (game.Players[targetPLR].Character:FindFirstChild("Right Arm") or game.Players[targetPLR].Character:FindFirstChild("RightUpperArm")).CFrame * CFrame.new(2, 0, 0)
+                    end)
+
+                elseif index == 2 then
+                    robotF = RunService.Heartbeat:Connect(function()
+                        LocalPLR.Character.HumanoidRootPart.CFrame =
+                            (game.Players[targetPLR].Character:FindFirstChild("Left Arm") or game.Players[targetPLR].Character:FindFirstChild("LeftUpperArm")).CFrame * CFrame.new(-2, 0, 0)
+                    end)
+
+                elseif index == 3 then
+                    robotF = RunService.Heartbeat:Connect(function()
+                        LocalPLR.Character.HumanoidRootPart.CFrame =
+                            (game.Players[targetPLR].Character:FindFirstChild("Left Leg") or game.Players[targetPLR].Character:FindFirstChild("LeftUpperLeg")).CFrame * CFrame.new(0, -2, 0)
+                    end)
+
+                elseif index == 4 then
+                    robotF = RunService.Heartbeat:Connect(function()
+                        LocalPLR.Character.HumanoidRootPart.CFrame =
+                            (game.Players[targetPLR].Character:FindFirstChild("Right Leg") or game.Players[targetPLR].Character:FindFirstChild("RightUpperLeg")).CFrame * CFrame.new(0, -2, 0)
+                    end)
+                end
+            end
+
+        end
+
+        if msg:sub(1, 8) == Prefix .. "unrobot" then
+            function runCode()
+                if robotF then
+                    robotF:Disconnect()
+                    workspace.Gravity = normalGravity
+                    LocalPLR.Character.Humanoid.PlatformStand = false
+                end
+            end
+
+            specifyBots(msg:sub(10), runCode)
         end
 
         -- FREEZE
@@ -1176,6 +1217,38 @@ if LocalPLR.Name ~= Username then
 
         end
 
+        -- VALIDATE:
+        if msg == Prefix .. "validate" then
+            local plrs = {}
+            if index == 1 then
+                chat("checking ")
+            end
+
+            for _, plr in pairs(game.Players:GetPlayers()) do
+                table.insert(plrs, plr.Name)
+            end
+
+            task.wait(1)
+            for i, bot in pairs(bots) do
+                if not table.find(plrs, bot) then
+                    if index == 1 then
+                        chat("B " .. i .. " not f")
+                    end
+
+                    task.wait()
+                    chat("r bot " .. i .. "!")
+
+                    table.remove(bots, i)
+                    getIndex()
+                end
+            end
+
+            if index == 1 then
+                chat("val bot")
+            end
+
+        end
+
         -- STACK:
         if msg:sub(1, 6) == Prefix .. "stack" then
             local args = getArgs(message:sub(8))
@@ -1183,7 +1256,7 @@ if LocalPLR.Name ~= Username then
             local targetPLR = getFullPlayerName(args[1])
 
             function runCode()
-                if game.Players[targetPLR].Character:FindFirstChild("HumanoidRootPart") then
+                if game.Players:FindFirstChild(targetPLR).Character:FindFirstChild("HumanoidRootPart") then
                     workspace.Gravity = 0
 
                     local stackHeight = 3
@@ -1219,7 +1292,7 @@ if LocalPLR.Name ~= Username then
             end
 
             function runCode()
-                if game.Players[targetPLR].Character:FindFirstChild("HumanoidRootPart") then
+                if game.Players:FindFirstChild(targetPLR).Character:FindFirstChild("HumanoidRootPart") then
                     workspace.Gravity = 0
 
                     local stackHeight = 3
@@ -1365,9 +1438,9 @@ if LocalPLR.Name ~= Username then
             local bangSpeed = tonumber(args[2]) or 10
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
 
-                    bangAnim = Instance.new('Animation')
+                    bangAnim = Instance.new("Animation")
                     bangAnim.AnimationId = "rbxassetid://" .. isR15(5918726674, 148840371)
                     plrHum = LocalPLR.Character.Humanoid
 
@@ -1403,9 +1476,9 @@ if LocalPLR.Name ~= Username then
             end
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
 
-                    bangAnim3 = Instance.new('Animation')
+                    bangAnim3 = Instance.new("Animation")
                     bangAnim3.AnimationId = "rbxassetid://" .. isR15(5918726674, 148840371)
                     plrHum3 = LocalPLR.Character.Humanoid
 
@@ -1439,9 +1512,9 @@ if LocalPLR.Name ~= Username then
             local bangOffet = CFrame.new(0, 2.3, -1.1)
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
 
-                    bangAnim2 = Instance.new('Animation')
+                    bangAnim2 = Instance.new("Animation")
                     bangAnim2.AnimationId = "rbxassetid://" .. isR15(5918726674, 148840371)
                     plrHum = LocalPLR.Character.Humanoid
 
@@ -1474,9 +1547,9 @@ if LocalPLR.Name ~= Username then
             local bangOffet = CFrame.new(0, 2.3, -1.1)
 
             function runCode()
-                if game.Players[targetPLR] then
+                if game.Players:FindFirstChild(targetPLR) then
 
-                    bangAnim3 = Instance.new('Animation')
+                    bangAnim3 = Instance.new("Animation")
                     bangAnim3.AnimationId = "rbxassetid://" .. isR15(5918726674, 148840371)
                     plrHum = LocalPLR.Character.Humanoid
 
@@ -1594,7 +1667,7 @@ if LocalPLR.Name ~= Username then
                 end
 
                 blob = "\u{000D}"
-                chat("." .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. "🚨 Important Announcement: " .. msg:sub(11) ..  " 🚨" .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. ".")
+                chat("." .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " important information:" .. msg:sub(11) ..  " 🚨" .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. " " .. blob .. ".")
             end
         end
 
@@ -1602,10 +1675,10 @@ if LocalPLR.Name ~= Username then
         if msg == Prefix .. "version" then
 
             if index == 1 then
-                if latestVersion ~= "1.1.3" then
-                    chat("Running V1.1.3 (old)")
+                if latestVersion ~= "1.1.4" then
+                    chat("V1.1.4 (old)")
                 else
-                    chat("Running V1.1.3")
+                    chat("V1.1.4")
                 end
             end
 
@@ -1678,7 +1751,7 @@ if LocalPLR.Name ~= Username then
         if msg:sub(1, 6) == Prefix .. "wings" then
             if #bots < 2 then
                 if index == 1 then
-                    chat("You need minimum of 2 bots to use this command!")
+                    chat("2 b needed")
                 end
 
                 return
@@ -1691,7 +1764,7 @@ if LocalPLR.Name ~= Username then
             local args = getArgs(message:sub(8))
             local targetPLR = getFullPlayerName(args[1])
 
-            if game.Players[targetPLR] then
+            if game.Players:FindFirstChild(targetPLR) then
                 workspace.Gravity = 0
                 wingsF = RunService.Heartbeat:Connect(function(deltaTime)
                     if index == 1 then
@@ -1809,7 +1882,7 @@ if LocalPLR.Name ~= Username then
 
             function runCode()
                 if not isR15() then
-                    if game.Players[targetPLR] then
+                    if game.Players:FindFirstChild(targetPLR) then
 
                         anim1 = Instance.new("Animation")
                         anim1.AnimationId = "rbxassetid://283545583"
@@ -1829,7 +1902,7 @@ if LocalPLR.Name ~= Username then
 
                     end
                 else
-                    chat("Bot needs to be r6!")
+                    chat("r6 needed")
                 end
             end
 
@@ -1862,7 +1935,7 @@ if LocalPLR.Name ~= Username then
         if msg:sub(1, 8) == Prefix .. "fullbox" then
             if #bots < 4 then
                 if index == 1 then
-                    chat("You need minimum of 4 bots to use this command!")
+                    chat("4 b needed")
                 end
 
                 return
@@ -1986,7 +2059,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 if not args[1] then
                     if index == 1 then
-                        chat("Pick emote or type " .. Prefix .. "dance list!")
+                        chat("pick m or s" .. Prefix .. "dance list")
                     end
                 else
                     if args[1] == "1" then
@@ -2009,7 +2082,7 @@ if LocalPLR.Name ~= Username then
                         end
                     else
                         if index == 1 then
-                            chat("Pick emote or type " .. Prefix .. "dance list!")
+                            chat("pick m or s " .. Prefix .. "dance list")
                         end
                     end
                 end
@@ -2023,7 +2096,7 @@ if LocalPLR.Name ~= Username then
         if msg == Prefix .. "credits" then
 
             if index == 1 then
-                chat("This is a private script maded by Sclwleo.")
+                chat("private script maded by leo")
             end
 
         end
@@ -2039,7 +2112,7 @@ if LocalPLR.Name ~= Username then
 
             if not tonumber(args[1]) then
                 if index == 1 then
-                    chat("Please specify number.")
+                    chat("number?")
                 end
 
                 return
@@ -2048,7 +2121,7 @@ if LocalPLR.Name ~= Username then
             function runCode()
                 setfpscap(tonumber(args[1]))
 
-                chat("Fps cap has been set to " .. args[1] .. " on bot " .. index .. "!")
+                chat("setted  " .. args[1] .. " on bot " .. index .. "!")
             end
 
             specifyBots2(args, 2, runCode)
@@ -2069,15 +2142,15 @@ if LocalPLR.Name ~= Username then
                 if switch == "disable" then
                     RunService:Set3dRenderingEnabled(false)
 
-                    showDefaultGui(true, "ControlBotZ Running (3drender disabled)")
+                    showDefaultGui(true, "leobotcontrol running (3drender disabled)")
 
-                    chat("3D Rendering Has Been Disabled On Bot " .. index .. "!")
+                    chat("3d disabled on " .. index .. "!")
                 elseif switch == "enable" then
                     RunService:Set3dRenderingEnabled(true)
 
                     showDefaultGui(false)
 
-                    chat("3D Rendering Has Been Enabled On Bot " .. index .. "!")
+                    chat("3d enable on " .. index .. "!")
                 end
             end
 
@@ -2100,11 +2173,11 @@ if LocalPLR.Name ~= Username then
                 if switch == "disable" then
                     showDefaultGui(false)
 
-                    chat("Privacy Mode Has Been Disabled On Bot " .. index .. "!")
+                    chat("p mode off " .. index .. "!")
                 elseif switch == "enable" then
-                    showDefaultGui(true, "Leo control bot Running (privacy mode enabled)")
+                    showDefaultGui(true, "leobotcontrol running (privacy mode enabled)")
 
-                    chat("Privacy Mode Has Been Enabled On Bot " .. index .. "!")
+                    chat("p mode on " .. index .. "!")
                 end
             end
 
@@ -2128,11 +2201,11 @@ if LocalPLR.Name ~= Username then
                         VU:CaptureController()
                         VU:ClickButton2(Vector2.new())
                     end)
-                    chat("Anti-afk has been enabled on bot " .. index .. "!")
+                    chat("success on bot " .. index .. "!")
                 elseif switch == "disable" then
                     if antiafkF then
                         antiafkF:Disconnect()
-                        chat("Anti-afk has been disabled on bot " .. index .. "!")
+                        chat("success on bot " .. index .. "!")
                     end
                 end
             end
@@ -2148,12 +2221,13 @@ if LocalPLR.Name ~= Username then
             end
 
             function runCode()
-                chat("Quitting script on bot " .. index .. "!")
+                chat("bye bye " .. index .. "!")
 
                 Username = ""
                 whitelist = {}
                 admins = {}
 
+                getgenv().cbzloaded = false
                 script:Destroy()
             end
 
@@ -2178,14 +2252,14 @@ if LocalPLR.Name ~= Username then
                     chat("surround (username) (spacing), partsrain (username) (height)/unpartsrain, hug (username)/unhug, worm (username)/unworm, index, logchat (enable/disable), 4k (username), whitelist+ (username)/")
                     wait(0.2)
 
-                    chat("whitelist- (username), admin+ (username)/admin- (username), jork (speed)/unjork, frontflip/backflip, freeze/unfreeze, antiafk (enable/disable), version, botremove (index), printcmds, scm, fpscap (num)")
+                    chat("whitelist- (username), admin+ (username)/admin- (username), jork (speed)/unjork, frontflip/backflip, freeze/unfreeze, antiafk (enable/disable), version, botremove (index), printcmds, fpscap (num)")
                     wait(0.2)
 
                     chat("2stack (username)/unstack, 2bang (username)/unbang, fullbox (username)/unfullbox, stairs (username)/unstairs, gravity (number), 2facebang (username)/unfbang, wings (username)/unwings,bridge (username)")
                 elseif page == "3" then
-                    chat("unbridge, copychat (username)/uncopychat")
+                    chat("unbridge, copychat (username)/uncopychat, validate, robot (username), unrobot")
                 else
-                    chat("Please select a page 1, 2 or 3!")
+                    chat("select page")
                 end
             end
 
@@ -2238,7 +2312,7 @@ if LocalPLR.Name ~= Username then
                 getIndex()
 
                 if index == 1 then
-                    chat("Bot " .. i .. " left the game!")
+                    chat("b " .. i .. " left")
                 end
             end
         end
